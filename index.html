@@ -722,68 +722,72 @@
             });
             
             // Download results
-            downloadResultsBtn.addEventListener('click', function() {
-                // Calculate balances again
-                const balances = {};
-                members.forEach(member => {
-                    balances[member] = 0;
-                });
-                
-                payments.forEach(payment => {
-                    const { payer, amount, recipients } = payment;
-                    const splitAmount = amount / recipients.length;
-                    balances[payer] += amount;
-                    recipients.forEach(recipient => {
-                        balances[recipient] -= splitAmount;
-                    });
-                });
-                
-                const transactions = calculateSettlements(balances);
-                
-                // Create CSV content
-                let csvContent = "data:text/csv;charset=utf-8,";
-                
-                // Add header
-                csvContent += "Báo Cáo Chi Tiêu Nhóm\r\n\r\n";
-                
-                // Add members summary
-                csvContent += "Tổng Kết Chi Tiêu:\r\n";
-                csvContent += "Thành viên,Số dư,Trạng thái\r\n";
-                
-                Object.entries(balances).forEach(([member, balance]) => {
-                    const status = balance > 0 ? "Nhận lại" : balance < 0 ? "Cần trả" : "Hòa vốn";
-                    csvContent += `${member},${formatCurrency(balance)},${status}\r\n`;
-                });
-                
-                // Add transactions
-                csvContent += "\r\nCác Giao Dịch Cần Thực Hiện:\r\n";
-                
-                if (transactions.length > 0) {
-                    csvContent += "Người trả,Người nhận,Số tiền\r\n";
-                    transactions.forEach(transaction => {
-                        csvContent += `${transaction.from},${transaction.to},${formatCurrency(transaction.amount)}\r\n`;
-                    });
-                } else {
-                    csvContent += "Không có giao dịch cần thực hiện. Mọi người đã hòa vốn!\r\n";
-                }
-                
-                // Add payment details
-                csvContent += "\r\nChi Tiết Các Khoản Chi:\r\n";
-                csvContent += "Người chi trả,Số tiền,Người nhận\r\n";
-                
-                payments.forEach(payment => {
-                    csvContent += `${payment.payer},${formatCurrency(payment.amount)},${payment.recipients.join('; ')}\r\n`;
-                });
-                
-                // Create download link
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "chia-se-chi-phi.csv");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
+            // Download results
+			downloadResultsBtn.addEventListener('click', function() {
+				// Calculate balances again
+				const balances = {};
+				members.forEach(member => {
+					balances[member] = 0;
+				});
+				
+				payments.forEach(payment => {
+					const { payer, amount, recipients } = payment;
+					const splitAmount = amount / recipients.length;
+					balances[payer] += amount;
+					recipients.forEach(recipient => {
+						balances[recipient] -= splitAmount;
+					});
+				});
+				
+				const transactions = calculateSettlements(balances);
+				
+				// Tạo nội dung CSV với BOM
+				let csvContent = "\ufeff";  // Thêm BOM cho UTF-8
+				
+				// Tiếp tục phần nội dung CSV như trước
+				csvContent += "Báo Cáo Chi Tiêu Nhóm\r\n\r\n";
+				
+				// Add members summary
+				csvContent += "Tổng Kết Chi Tiêu:\r\n";
+				csvContent += "Thành viên,Số dư,Trạng thái\r\n";
+				
+				Object.entries(balances).forEach(([member, balance]) => {
+					const status = balance > 0 ? "Nhận lại" : balance < 0 ? "Cần trả" : "Hòa vốn";
+					csvContent += `${member},${formatCurrency(balance)},${status}\r\n`;
+				});
+				
+				// Add transactions
+				csvContent += "\r\nCác Giao Dịch Cần Thực Hiện:\r\n";
+				
+				if (transactions.length > 0) {
+					csvContent += "Người trả,Người nhận,Số tiền\r\n";
+					transactions.forEach(transaction => {
+						csvContent += `${transaction.from},${transaction.to},${formatCurrency(transaction.amount)}\r\n`;
+					});
+				} else {
+					csvContent += "Không có giao dịch cần thực hiện. Mọi người đã hòa vốn!\r\n";
+				}
+				
+				// Add payment details
+				csvContent += "\r\nChi Tiết Các Khoản Chi:\r\n";
+				csvContent += "Người chi trả,Số tiền,Người nhận\r\n";
+				
+				payments.forEach(payment => {
+					csvContent += `${payment.payer},${formatCurrency(payment.amount)},${payment.recipients.join(', ')}\r\n`;
+				});
+				
+				// Tạo Blob và tải file CSV
+				const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+				const link = document.createElement('a');
+				if (link.download !== undefined) { // Kiểm tra trình duyệt hỗ trợ tính năng tải xuống
+					const url = URL.createObjectURL(blob);
+					link.setAttribute('href', url);
+					link.setAttribute('download', 'chia-se-chi-phi.csv');
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+				}
+			});
         });
     </script>
 </body>
