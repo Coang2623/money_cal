@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chia Sẻ Chi Phí</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4285F4;
+            --secondary-color: #34A853;
+            --accent-color: #FBBC05;
+            --danger-color: #EA4335;
+            --light-color: #F8F9FA;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+            padding-bottom: 60px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3367d6;
+            border-color: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            border-radius: 8px;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(66, 133, 244, 0.25);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        
+        .payment-row {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-card {
+            background-color: #e8f0fe;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .positive-amount {
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+        
+        .negative-amount {
+            color: var(--danger-color);
+            font-weight: 500;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 15px;
+            position: relative;
+            font-weight: 500;
+        }
+        
+        .step.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .step::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background-color: #e9ecef;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .step:last-child::after {
+            display: none;
+        }
+        
+        .step.completed {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .step.completed::after {
+            background-color: var(--secondary-color);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .material-icons {
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Ứng Dụng Chia Sẻ Chi Phí</h1>
+        
+        <div class="step-indicator">
+            <div class="step active" id="step1">1</div>
+            <div class="step" id="step2">2</div>
+            <div class="step" id="step3">3</div>
+        </div>
+        
+        <!-- Step 1: Select Number of Members -->
+        <div class="card mb-4" id="memberSelectionCard">
+            <div class="card-header">
+                <span class="material-icons">group</span> Bước 1: Chọn Số Lượng Thành Viên
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <label for="memberCount" class="form-label">Số lượng thành viên (1-10):</label>
+                    <input type="range" class="form-range" min="1" max="10" step="1" id="memberCount" value="3">
+                    <div class="text-center fs-4 mt-2" id="memberCountDisplay">3 thành viên</div>
+                </div>
+                
+                <div id="memberNamesContainer" class="mb-4">
+                    <!-- Member name inputs will be generated here -->
+                </div>
+                
+                <button class="btn btn-primary w-100" id="continueToPayments">
+                    <span class="material-icons">arrow_forward</span> Tiếp tục
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 2: Input Payments -->
+        <div class="card mb-4" id="paymentsCard" style="display: none;">
+            <div class="card-header">
+                <span class="material-icons">payments</span> Bước 2: Nhập Các Khoản Chi
+            </div>
+            <div class="card-body">
+                <div id="paymentsContainer">
+                    <!-- Payment rows will be added here -->
+                </div>
+                
+                <div class="d-flex justify-content-between mt-3">
+                    <button class="btn btn-outline-primary" id="addPaymentBtn">
+                        <span class="material-icons">add</span> Thêm khoản chi
+                    </button>
+                    <button class="btn btn-primary" id="calculateBtn">
+                        <span class="material-icons">calculate</span> Tính toán
+                    </button>
+                </div>
+                
+                <button class="btn btn-outline-secondary mt-3" id="backToMembersBtn">
+                    <span class="material-icons">arrow_back</span> Quay lại
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Results -->
+        <div class="card mb-4" id="resultsCard" style="display: none;">
+            <div class="card-header">
+                <span class="material-icons">summarize</span> Bước 3: Kết Quả Tính Toán
+            </div>
+            <div class="card-body">
+                <div id="resultsContainer">
+                    <!-- Results will be displayed here -->
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <button class="btn btn-outline-secondary" id="backToPaymentsBtn">
+                        <span class="material-icons">arrow_back</span> Quay lại
+                    </button>
+                    <button class="btn btn-success" id="downloadResultsBtn">
+                        <span class="material-icons">download</span> Tải kết quả
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Variables
+            let members = [];
+            let payments = [];
+            
+            // DOM Elements
+            const memberCount = document.getElementById('memberCount');
+            const memberCountDisplay = document.getElementById('memberCountDisplay');
+            const memberNamesContainer = document.getElementById('memberNamesContainer');
+            const continueToPaymentsBtn = document.getElementById('continueToPayments');
+            const memberSelectionCard = document.getElementById('memberSelectionCard');
+            const paymentsCard = document.getElementById('paymentsCard');
+            const paymentsContainer = document.getElementById('paymentsContainer');
+            const addPaymentBtn = document.getElementById('addPaymentBtn');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const backToMembersBtn = document.getElementById('backToMembersBtn');
+            const resultsCard = document.getElementById('resultsCard');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const backToPaymentsBtn = document.getElementById('backToPaymentsBtn');
+            const downloadResultsBtn = document.getElementById('downloadResultsBtn');
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            
+            // Format currency function
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN', { 
+                    style: 'currency', 
+                    currency: 'VND',
+                    maximumFractionDigits: 0
+                }).format(amount);
+            }
+            
+            // Parse currency input
+            function parseCurrency(value) {
+                if (!value) return 0;
+                return parseInt(value.replace(/[^\d]/g, '')) || 0;
+            }
+            
+            // Update member count display
+            memberCount.addEventListener('input', function() {
+                const count = parseInt(this.value);
+                memberCountDisplay.textContent = `${count} thành viên`;
+                generateMemberInputs(count);
+            });
+            
+            // Generate member name inputs
+            function generateMemberInputs(count) {
+                memberNamesContainer.innerHTML = '';
+                
+                for (let i = 0; i < count; i++) {
+                    const memberValue = members[i] ? members[i] : '';
+                    
+                    const div = document.createElement('div');
+                    div.className = 'mb-3';
+                    div.innerHTML = `
+                        <label for="member${i}" class="form-label">Tên thành viên ${i + 1}:</label>
+                        <input type="text" class="form-control member-name" id="member${i}" 
+                               placeholder="Nhập tên thành viên" value="${memberValue}" required>
+                    `;
+                    memberNamesContainer.appendChild(div);
+                }
+            }
+            
+            // Initialize with default 3 members
+            generateMemberInputs(3);
+            
+            // Continue to payments step
+            continueToPaymentsBtn.addEventListener('click', function() {
+                // Validate member names
+                const memberInputs = document.querySelectorAll('.member-name');
+                let isValid = true;
+                members = [];
+                
+                memberInputs.forEach(input => {
+                    if (!input.value.trim()) {
+                        input.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        input.classList.remove('is-invalid');
+                        members.push(input.value.trim());
+                    }
+                });
+                
+                if (!isValid) {
+                    alert('Vui lòng nhập tên cho tất cả thành viên!');
+                    return;
+                }
+                
+                // Show payments step
+                memberSelectionCard.style.display = 'none';
+                paymentsCard.style.display = 'block';
+                step1.classList.remove('active');
+                step1.classList.add('completed');
+                step2.classList.add('active');
+                
+                // Initialize payments container
+                if (payments.length === 0) {
+                    addPaymentRow();
+                } else {
+                    renderPaymentRows();
+                }
+            });
+            
+            // Add payment row
+            function addPaymentRow() {
+                const paymentId = Date.now();
+                payments.push({
+                    id: paymentId,
+                    payer: '',
+                    amount: 0,
+                    recipients: []
+                });
+                
+                renderPaymentRows();
+            }
+            
+            // Render payment rows
+            function renderPaymentRows() {
+                paymentsContainer.innerHTML = '';
+                
+                payments.forEach((payment, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'payment-row';
+                    div.dataset.id = payment.id;
+                    
+                    // Create recipients checkboxes
+                    let recipientsHtml = '';
+                    members.forEach(member => {
+                        const isChecked = payment.recipients.includes(member) ? 'checked' : '';
+                        recipientsHtml += `
+                            <div class="form-check">
+                                <input class="form-check-input recipient-checkbox" type="checkbox" 
+                                       value="${member}" id="recipient_${payment.id}_${member}" ${isChecked}>
+                                <label class="form-check-label" for="recipient_${payment.id}_${member}">
+                                    ${member}
+                                </label>
+                            </div>
+                        `;
+                    });
+                    
+                    div.innerHTML = `
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Người chi trả:</label>
+                                <select class="form-select payer-select">
+                                    <option value="">Chọn người chi trả</option>
+                                    ${members.map(member => `
+                                        <option value="${member}" ${payment.payer === member ? 'selected' : ''}>
+                                            ${member}
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số tiền:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control amount-input" 
+                                           placeholder="Nhập số tiền" 
+                                           value="${payment.amount ? formatCurrency(payment.amount).replace(' ₫', '') : ''}">
+                                    <span class="input-group-text">VND</span>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <label class="form-label">Người nhận:</label>
+                                <div class="recipients-container">
+                                    ${recipientsHtml}
+                                </div>
+                            </div>
+                            ${payments.length > 1 ? `
+                                <div class="col-12 mt-2">
+                                    <button class="btn btn-sm btn-danger remove-payment-btn">
+                                        <span class="material-icons">delete</span> Xóa
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    paymentsContainer.appendChild(div);
+                });
+                
+                // Add event listeners to new elements
+                document.querySelectorAll('.payer-select').forEach(select => {
+                    select.addEventListener('change', updatePayment);
+                });
+                
+                document.querySelectorAll('.amount-input').forEach(input => {
+                    input.addEventListener('input', function(e) {
+                        // Format as currency while typing
+                        const value = parseCurrency(this.value);
+                        if (value || value === 0) {
+                            this.value = formatCurrency(value).replace(' ₫', '');
+                        }
+                        updatePayment.call(this);
+                    });
+                });
+                
+                document.querySelectorAll('.recipient-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', updatePayment);
+                });
+                
+                document.querySelectorAll('.remove-payment-btn').forEach(button => {
+                    button.addEventListener('click', removePaymentRow);
+                });
+            }
+            
+            // Update payment data
+            function updatePayment() {
+                const paymentRow = this.closest('.payment-row');
+                const paymentId = parseInt(paymentRow.dataset.id);
+                const paymentIndex = payments.findIndex(p => p.id === paymentId);
+                
+                if (paymentIndex !== -1) {
+                    const payer = paymentRow.querySelector('.payer-select').value;
+                    const amountInput = paymentRow.querySelector('.amount-input').value;
+                    const amount = parseCurrency(amountInput);
+                    
+                    const recipients = [];
+                    paymentRow.querySelectorAll('.recipient-checkbox:checked').forEach(checkbox => {
+                        recipients.push(checkbox.value);
+                    });
+                    
+                    payments[paymentIndex] = {
+                        ...payments[paymentIndex],
+                        payer,
+                        amount,
+                        recipients
+                    };
+                }
+            }
+            
+            // Remove payment row
+            function removePaymentRow() {
+                const paymentRow = this.closest('.payment-row');
+                const paymentId = parseInt(paymentRow.dataset.id);
+                
+                payments = payments.filter(p => p.id !== paymentId);
+                renderPaymentRows();
+            }
+            
+            // Add payment button
+            addPaymentBtn.addEventListener('click', addPaymentRow);
+            
+            // Back to members button
+            backToMembersBtn.addEventListener('click', function() {
+                paymentsCard.style.display = 'none';
+                memberSelectionCard.style.display = 'block';
+                step2.classList.remove('active');
+                step1.classList.remove('completed');
+                step1.classList.add('active');
+            });
+            
+            // Calculate button
+            calculateBtn.addEventListener('click', function() {
+                // Validate payments
+                let isValid = true;
+                let errorMessage = '';
+                
+                if (payments.length === 0) {
+                    errorMessage = 'Vui lòng thêm ít nhất một khoản chi!';
+                    isValid = false;
+                }
+                
+                payments.forEach((payment, index) => {
+                    if (!payment.payer) {
+                        errorMessage = `Khoản chi #${index + 1}: Vui lòng chọn người chi trả!`;
+                        isValid = false;
+                    }
+                    
+                    if (!payment.amount) {
+                        errorMessage = `Khoản chi #${index + 1}: Vui lòng nhập số tiền!`;
+                        isValid = false;
+                    }
+                    
+                    if (payment.recipients.length === 0) {
+                        errorMessage = `Khoản chi #${index + 1}: Vui lòng chọn ít nhất một người nhận!`;
+                        isValid = false;
+                    }
+                });
+                
+                if (!isValid) {
+                    alert(errorMessage);
+                    return;
+                }
+                
+                // Calculate balances
+                calculateBalances();
+                
+                // Show results step
+                paymentsCard.style.display = 'none';
+                resultsCard.style.display = 'block';
+                step2.classList.remove('active');
+                step2.classList.add('completed');
+                step3.classList.add('active');
+            });
+            
+            // Calculate balances
+            function calculateBalances() {
+                // Initialize balances for each member
+                const balances = {};
+                members.forEach(member => {
+                    balances[member] = 0;
+                });
+                
+                // Process each payment
+                payments.forEach(payment => {
+                    const { payer, amount, recipients } = payment;
+                    const splitAmount = amount / recipients.length;
+                    
+                    // Add the full amount to the payer's balance
+                    balances[payer] += amount;
+                    
+                    // Subtract the split amount from each recipient's balance
+                    recipients.forEach(recipient => {
+                        balances[recipient] -= splitAmount;
+                    });
+                });
+                
+                // Display results
+                displayResults(balances);
+            }
+            
+            // Display results
+            function displayResults(balances) {
+                resultsContainer.innerHTML = '';
+                
+                // Summary section
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'mb-4';
+                summaryDiv.innerHTML = `
+                    <h4 class="mb-3">Tổng Kết Chi Tiêu</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Thành viên</th>
+                                    <th>Số dư</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${Object.entries(balances).map(([member, balance]) => `
+                                    <tr>
+                                        <td>${member}</td>
+                                        <td class="${balance > 0 ? 'positive-amount' : balance < 0 ? 'negative-amount' : ''}">
+                                            ${formatCurrency(balance)}
+                                        </td>
+                                        <td>
+                                            ${balance > 0 
+                                                ? '<span class="badge bg-success">Nhận lại</span>' 
+                                                : balance < 0 
+                                                    ? '<span class="badge bg-danger">Cần trả</span>' 
+                                                    : '<span class="badge bg-secondary">Hòa vốn</span>'}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                resultsContainer.appendChild(summaryDiv);
+                
+                // Transactions to settle
+                const transactionsDiv = document.createElement('div');
+                transactionsDiv.className = 'mt-4';
+                transactionsDiv.innerHTML = '<h4 class="mb-3">Các Giao Dịch Cần Thực Hiện</h4>';
+                
+                // Calculate transactions to settle debts
+                const transactions = calculateSettlements(balances);
+                
+                if (transactions.length > 0) {
+                    const transactionsList = document.createElement('div');
+                    transactionsList.className = 'list-group';
+                    
+                    transactions.forEach(transaction => {
+                        const item = document.createElement('div');
+                        item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                        item.innerHTML = `
+                            <div>
+                                <span class="material-icons text-danger">arrow_forward</span>
+                                <strong>${transaction.from}</strong> cần trả cho <strong>${transaction.to}</strong>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">${formatCurrency(transaction.amount)}</span>
+                        `;
+                        transactionsList.appendChild(item);
+                    });
+                    
+                    transactionsDiv.appendChild(transactionsList);
+                } else {
+                    transactionsDiv.innerHTML += '<p class="alert alert-info">Không có giao dịch cần thực hiện. Mọi người đã hòa vốn!</p>';
+                }
+                
+                resultsContainer.appendChild(transactionsDiv);
+            }
+            
+            // Calculate settlements
+            function calculateSettlements(balances) {
+                const transactions = [];
+                const creditors = []; // People who should receive money (positive balance)
+                const debtors = [];   // People who should pay money (negative balance)
+                
+                // Separate members into creditors and debtors
+                for (const [member, balance] of Object.entries(balances)) {
+                    if (balance > 0) {
+                        creditors.push({ member, balance });
+                    } else if (balance < 0) {
+                        debtors.push({ member, balance: Math.abs(balance) });
+                    }
+                }
+                
+                // Sort by amount (descending)
+                creditors.sort((a, b) => b.balance - a.balance);
+                debtors.sort((a, b) => b.balance - a.balance);
+                
+                // Create transactions to settle debts
+                while (debtors.length > 0 && creditors.length > 0) {
+                    const debtor = debtors[0];
+                    const creditor = creditors[0];
+                    
+                    const amount = Math.min(debtor.balance, creditor.balance);
+                    
+                    transactions.push({
+                        from: debtor.member,
+                        to: creditor.member,
+                        amount
+                    });
+                    
+                    debtor.balance -= amount;
+                    creditor.balance -= amount;
+                    
+                    // Remove members with zero balance
+                    if (debtor.balance < 1) debtors.shift();
+                    if (creditor.balance < 1) creditors.shift();
+                }
+                
+                return transactions;
+            }
+            
+            // Back to payments button
+            backToPaymentsBtn.addEventListener('click', function() {
+                resultsCard.style.display = 'none';
+                paymentsCard.style.display = 'block';
+                step3.classList.remove('active');
+                step2.classList.remove('completed');
+                step2.classList.add('active');
+            });
+            
+            // Download results
+            downloadResultsBtn.addEventListener('click', function() {
+                // Calculate balances again
+                const balances = {};
+                members.forEach(member => {
+                    balances[member] = 0;
+                });
+                
+                payments.forEach(payment => {
+                    const { payer, amount, recipients } = payment;
+                    const splitAmount = amount / recipients.length;
+                    balances[payer] += amount;
+                    recipients.forEach(recipient => {
+                        balances[recipient] -= splitAmount;
+                    });
+                });
+                
+                const transactions = calculateSettlements(balances);
+                
+                // Create CSV content
+                let csvContent = "data:text/csv;charset=utf-8,";
+                
+                // Add header
+                csvContent += "Báo Cáo Chi Tiêu Nhóm\r\n\r\n";
+                
+                // Add members summary
+                csvContent += "Tổng Kết Chi Tiêu:\r\n";
+                csvContent += "Thành viên,Số dư,Trạng thái\r\n";
+                
+                Object.entries(balances).forEach(([member, balance]) => {
+                    const status = balance > 0 ? "Nhận lại" : balance < 0 ? "Cần trả" : "Hòa vốn";
+                    csvContent += `${member},${formatCurrency(balance)},${status}\r\n`;
+                });
+                
+                // Add transactions
+                csvContent += "\r\nCác Giao Dịch Cần Thực Hiện:\r\n";
+                
+                if (transactions.length > 0) {
+                    csvContent += "Người trả,Người nhận,Số tiền\r\n";
+                    transactions.forEach(transaction => {
+                        csvContent += `${transaction.from},${transaction.to},${formatCurrency(transaction.amount)}\r\n`;
+                    });
+                } else {
+                    csvContent += "Không có giao dịch cần thực hiện. Mọi người đã hòa vốn!\r\n";
+                }
+                
+                // Add payment details
+                csvContent += "\r\nChi Tiết Các Khoản Chi:\r\n";
+                csvContent += "Người chi trả,Số tiền,Người nhận\r\n";
+                
+                payments.forEach(payment => {
+                    csvContent += `${payment.payer},${formatCurrency(payment.amount)},${payment.recipients.join('; ')}\r\n`;
+                });
+                
+                // Create download link
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "chia-se-chi-phi.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        });
+    </script>
+</body>
+</html>
