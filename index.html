@@ -195,7 +195,7 @@
 </head>
 <body>
     <div class="container mt-4">
-        <h1 class="text-center mb-4">Ứng Dụng Chia Sẻ Chi Phí</h1>
+        <h1 class="text-center mb-4">Ứng Dụng Chia Tiền</h1>
         
         <div class="step-indicator">
             <div class="step active" id="step1">1</div>
@@ -236,15 +236,15 @@
                 </div>
                 
                 <div class="d-flex justify-content-between mt-3">
-                    <button class="btn btn-outline-primary" id="addPaymentBtn">
+                    <button class="btn btn-outline-primary m-1" id="addPaymentBtn">
                         <span class="material-icons">add</span> Thêm khoản chi
                     </button>
-                    <button class="btn btn-primary" id="calculateBtn">
+                    <button class="btn btn-primary m-1" id="calculateBtn">
                         <span class="material-icons">calculate</span> Tính toán
                     </button>
                 </div>
                 
-                <button class="btn btn-outline-secondary mt-3" id="backToMembersBtn">
+                <button class="btn btn-outline-secondary m-1 mt-3" id="backToMembersBtn">
                     <span class="material-icons">arrow_back</span> Quay lại
                 </button>
             </div>
@@ -261,10 +261,10 @@
                 </div>
                 
                 <div class="d-flex justify-content-between mt-4">
-                    <button class="btn btn-outline-secondary" id="backToPaymentsBtn">
+                    <button class="btn btn-outline-secondary m-1" id="backToPaymentsBtn">
                         <span class="material-icons">arrow_back</span> Quay lại
                     </button>
-                    <button class="btn btn-success" id="downloadResultsBtn">
+                    <button class="btn btn-success m-1" id="downloadResultsBtn">
                         <span class="material-icons">download</span> Tải kết quả
                     </button>
                 </div>
@@ -463,10 +463,10 @@
                 document.querySelectorAll('.amount-input').forEach(input => {
                     input.addEventListener('input', function(e) {
                         // Format as currency while typing
-                        const value = parseCurrency(this.value);
-                        if (value || value === 0) {
-                            this.value = formatCurrency(value).replace(' ₫', '');
-                        }
+                        //const value = parseCurrency(this.value);
+                        //if (value || value === 0) {
+                        //    this.value = formatCurrency(value).replace(' ₫', '');
+                        //}
                         updatePayment.call(this);
                     });
                 });
